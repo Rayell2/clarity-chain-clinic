@@ -9,6 +9,15 @@ ChainClinic enables secure storage and sharing of medical records between patien
 - Provider authorization system  
 - Secure record sharing
 - Audit trail of access
+- Provider verification system
+- Active/inactive provider status tracking
+
+## Provider Verification
+The platform now includes a verification system for healthcare providers:
+- Providers register with their credentials
+- Contract owner can verify provider credentials
+- Verification status is tracked on-chain
+- Only verified providers can be authorized for patient records
 
 ## Usage
 [Documentation on contract functions and how to use them]
