@@ -4,11 +4,12 @@
   { 
     name: (string-utf8 100),
     license: (string-ascii 50),
-    active: bool
+    active: bool,
+    verified: bool
   }
 )
 
-;; Constants
+;; Constants 
 (define-constant contract-owner tx-sender)
 (define-constant err-unauthorized (err u100))
 (define-constant err-already-registered (err u101))
@@ -22,9 +23,24 @@
       {
         name: name,
         license: license,
-        active: true
+        active: true,
+        verified: false
       }
     ))
+  )
+)
+
+;; Verify provider 
+(define-public (verify-provider (provider principal))
+  (begin
+    (asserts! (is-eq tx-sender contract-owner) err-unauthorized)
+    (match (map-get? providers {provider: provider})
+      provider-data (ok (map-set providers
+        {provider: provider}
+        (merge provider-data {verified: true})
+      ))
+      err-unauthorized
+    )
   )
 )
 
