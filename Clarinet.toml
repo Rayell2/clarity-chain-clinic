@@ -8,6 +8,10 @@ requirements = []
 path = "contracts/patient-records.clar"
 depends_on = []
 
+[contracts.provider-registry]
+path = "contracts/provider-registry.clar"
+depends_on = []
+
 [repl]
 costs_version = 2
 parser_version = 2
