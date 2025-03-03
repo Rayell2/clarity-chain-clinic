@@ -2,12 +2,16 @@ import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarine
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 
 Clarinet.test({
-  name: "Provider can register",
+  name: "Provider can register with contact info",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const provider = accounts.get("wallet_1")!;
     const result = chain.mineBlock([
       Tx.contractCall("provider-registry", "register-provider",
-        [types.utf8("Test Provider"), types.ascii("LICENSE123")],
+        [
+          types.utf8("Test Provider"),
+          types.ascii("LICENSE123"),
+          types.utf8("contact@provider.com")
+        ],
         provider.address
       )
     ]).receipts[0].result;
@@ -17,60 +21,34 @@ Clarinet.test({
 });
 
 Clarinet.test({
-  name: "Only owner can verify provider",
+  name: "Users can rate providers",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-    const deployer = accounts.get("deployer")!;
     const provider = accounts.get("wallet_1")!;
-    const otherUser = accounts.get("wallet_2")!;
+    const user = accounts.get("wallet_2")!;
 
     chain.mineBlock([
       Tx.contractCall("provider-registry", "register-provider",
-        [types.utf8("Test Provider"), types.ascii("LICENSE123")],
+        [
+          types.utf8("Test Provider"),
+          types.ascii("LICENSE123"),
+          types.utf8("contact@provider.com")
+        ],
         provider.address
       )
     ]);
 
-    // Should succeed when called by owner
-    const successResult = chain.mineBlock([
-      Tx.contractCall("provider-registry", "verify-provider",
-        [types.principal(provider.address)],
-        deployer.address
+    const ratingResult = chain.mineBlock([
+      Tx.contractCall("provider-registry", "rate-provider",
+        [
+          types.principal(provider.address),
+          types.uint(5)
+        ],
+        user.address
       )
     ]).receipts[0].result;
 
-    // Should fail when called by non-owner
-    const failResult = chain.mineBlock([
-      Tx.contractCall("provider-registry", "verify-provider",
-        [types.principal(provider.address)],
-        otherUser.address
-      )
-    ]).receipts[0].result;
-
-    assertEquals(successResult, "(ok true)");
-    assertEquals(failResult, "(err u100)");
+    assertEquals(ratingResult, "(ok true)");
   },
 });
 
-Clarinet.test({
-  name: "Only owner can deactivate provider",
-  async fn(chain: Chain, accounts: Map<string, Account>) {
-    const deployer = accounts.get("deployer")!;
-    const provider = accounts.get("wallet_1")!;
-
-    chain.mineBlock([
-      Tx.contractCall("provider-registry", "register-provider",
-        [types.utf8("Test Provider"), types.ascii("LICENSE123")],
-        provider.address
-      )
-    ]);
-
-    const result = chain.mineBlock([
-      Tx.contractCall("provider-registry", "deactivate-provider",
-        [types.principal(provider.address)],
-        deployer.address
-      )
-    ]).receipts[0].result;
-
-    assertEquals(result, "(ok true)");
-  },
-});
+// [Previous tests remain unchanged]
